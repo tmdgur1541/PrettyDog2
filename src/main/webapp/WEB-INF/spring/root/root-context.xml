@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- properties 설정 -->
+	<bean id="propertyConfuer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:/props/*.properties</value>
+			</list>
+		</property>
+	</bean>
+		
+	<!-- 파일 업로드 관련 설정 -->
+   <!-- 파일첨부 설정 -->
+   <bean id = "multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+      <property name="defaultEncoding" value="UTF-8"/><!-- 파일이름이 한글로 올 경우 깨짐방지 -->
+      <property name="maxUploadSize" value="10000000"/><!-- 하나의 파일을 올릴때 용량제한 -->
+      <property name="maxInMemorySize" value="10000000"/><!-- 업로드시 속도향상을 위한 버퍼 크기 -->
+   </bean>
+</beans>

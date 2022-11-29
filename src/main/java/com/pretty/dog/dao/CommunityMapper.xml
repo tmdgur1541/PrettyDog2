@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+	<!-- 리스트 출력 -->
+<mapper namespace="com.pretty.dog.dao.CommunityDAO">
+
+	
+	<!--  게시물 카테고리 목록 출력 -->
+	<select id="categoryList" resultType="dog">
+		select category_num, category_name,category_admin,category_blind  
+		from community_category	
+		where category_num not in(3)
+		and category_blind not in(1)
+	</select>
+	
+	<!-- 게시물 리스트 페이징 & 검색-->
+	
+	<select id="listCall" resultType="dog" parameterType="HashMap">
+     	select cb.community_boardnum, cb.category_num, cb.community_sub, cb.mem_id ,
+     	cb.community_date, cb.community_view, cb.community_likes, cb.community_blind,
+		cc.category_num,cc.category_name,cc.category_admin,cc.category_blind,
+		mb.mem_id,mb.mem_state
+		from  community_board cb, community_category cc, members mb 
+		where cb.category_num = cc.category_num 
+		and cb.mem_id = mb.mem_id
+		and cb.community_blind = 0
+		and cb.category_num not in(3)
+		and cc.category_blind = 0
+		and mb.mem_id  not in(1)
+		<choose>
+
+			<when test='searchOpt.equals("community_sub") and !keyword.equals("")'>
+			
+				<if test="catNum != 9">
+					and cb.community_sub LIKE CONCAT('%',#{keyword},'%') and cb.category_num = #{catNum}
+				</if>
+				
+				and cb.community_sub LIKE CONCAT('%',#{keyword},'%')
+			</when>
+
+			<when test='searchOpt.equals("community_cont") and !keyword.equals("")'>
+			
+				<if test="catNum != 9">
+					and cb.community_cont LIKE CONCAT('%',#{keyword},'%') and cb.category_num = #{catNum}
+				</if>
+				and cb.community_cont LIKE CONCAT('%',#{keyword},'%')
+			</when>
+		 	
+			<when test='searchOpt.equals("mem_id") and !keyword.equals("")'>
+			
+				<if test="catNum != 9">
+					and cb.mem_id LIKE CONCAT('%',#{keyword},'%') and cb.category_num = #{catNum}
+				</if>
+				and cb.mem_id LIKE CONCAT('%',#{keyword},'%')
+			</when>
+			
+			<when test ='catNum != 9'>
+				and cb.category_num = #{catNum}
+			</when>	
+	
+		
+		</choose>
+		
+		order by community_boardnum desc
+ 		limit #{pagePerCnt} offset #{offset}
+   </select>  
+	
+	  
+   <select id="allCount" resultType="int" parameterType="Integer">
+   		select count(community_boardnum)
+   		from community_board 
+   		where category_num not in(3)
+   		
+   				
+   </select>
+		
+	  <!-- 게시글 작성 -->
+	<insert id="freeWrite" 
+   useGeneratedKeys="true" 
+   keyProperty="community_boardnum"
+   keyColumn="community_boardnum"
+   parameterType="dog">
+   		INSERT INTO community_board(community_sub,community_cont,mem_id,category_num)VALUES(#{community_sub},#{community_cont},#{mem_id},#{category_num})  
+   </insert >
+   
+   <!-- 게시글작성 ~ 파일업로드 -->
+   <insert id="saveFile" useGeneratedKeys="true" keyProperty="community_boardnum" keyColumn="community_boardnum">
+   		INSERT INTO community_board_photo(community_boardnum,bphoto_oriname,bphoto_newname)VALUES(#{param1},#{param2},#{param3}) 
+   		
+   </insert>
+	
+	
+	<!-- 게시글 상세보기 -->
+	<select id="freeDetail" resultType="dog">
+   		
+	select cb.community_boardnum, cb.category_num, cb.community_sub, cb.mem_id , cb.community_date,  cb.community_cont, cb.community_view, cb.community_likes, cb.community_blind,
+		cc.category_num,cc.category_name,cc.category_admin,cc.category_blind
+		from  community_board cb, community_category cc
+		where cb.category_num = cc.category_num 
+		and cb.community_boardnum = #{param1}
+
+   </select>
+   
+   <!--  게시글 상세보기 ~ 이미지 출력 -->
+   <select id="photoList" resultType="dog">
+      select bphoto_oriname, bphoto_newname from community_board_photo where community_boardnum = #{param1}
+   </select>
+	
+   
+   <!-- 게시글 상세보기 ~ 댓글 리스트 출력 -->
+   <select id="commentList" resultType="dog">
+   		select * from community_board_comment 
+   		where community_boardnum = #{param1} 
+   		and bcomment_blind = 0
+   </select>
+  	
+  	<!-- 댓글갯수 가져오기 -->
+   <select id="commentCount" resultType="dog">
+   		select count(*) from community_board_comment
+		where community_boardnum = #{param1} 
+		and bcomment_blind = 0
+   </select>
+   
+
+   <!-- 댓글 삭제(블라인드) -->
+	<delete id="free_commentDelete">
+      update community_board_comment set bcomment_blind = 1 where bcomment_num = #{param1}
+   </delete>
+   
+   <!-- 댓글삭제 ~ 댓글번호 가져오기 -->
+   <select id="boardNumOfdelCom" resultType="Integer">
+   		select community_boardnum from community_board_comment where bcomment_num = #{param1} 
+   </select>
+ 	
+   
+ 	<!-- 게시글 조회수   -->
+	<update id="community_view">
+   		UPDATE community_board SET community_view = community_view+1 WHERE community_boardnum = #{param1}
+   </update>
+   
+	<!-- 게시글 삭제 ~ 블라인드 -->
+	<update id="freeDelete">
+      update community_board set community_blind = 1 where community_boardnum = #{param1}
+   </update>
+   
+   <delete id="free_imgDelete">
+	   	
+	   		delete from community_board_photo where bphoto_newname = #{param1}
+	  	 
+   </delete>
+   
+   
+   
+      
+   <!--  게시글 수정 -->
+   <update id="freeUpdate" parameterType="HashMap">
+      update community_board set community_sub = #{community_sub}
+      ,community_cont = #{community_cont}
+      ,category_num = #{category_num}
+      where community_boardnum = #{community_boardnum}
+   </update>
+  
+  <!-- 댓글작성 -->
+  <insert id="free_commentWrite" parameterType="dog">
+  	insert into community_board_comment (community_boardnum,mem_id, bcomment_cont)
+	values
+	( #{community_boardnum}, #{mem_id}, #{bcomment_cont})
+  </insert>
+  
+
+   
+<!-- 신고옵션 출력 (게시글) -->	
+<select id="declalist" resultType="dog">
+		select * 
+		from decOption where decO_blind = 0;
+</select> 
+
+<!-- 신고옵션 출력 (댓글) -->	
+<select id="declalistC" resultType="dog">
+		select * 
+		from decOption where decO_blind = 0;
+</select> 
+	
+<!-- 신고하기 (게시글) -->
+<insert id="DeclaSend_post" parameterType="hashmap">
+      insert into declaration(decO_num,mem_id,dec_target,dec_targetNum,dec_id) values(#{decO_num},#{mem_id},0,#{dec_targetNum},#{dec_id})
+</insert>
+
+<!-- 신고하기 (댓글) -->
+<insert id="DeclaSend_comment" parameterType="hashmap">
+      insert into declaration(decO_num,mem_id,dec_target,dec_targetNum,dec_id) values(#{decO_num},#{mem_id},1,#{dec_targetNum},#{dec_id})
+</insert>
+
+<!-- 신고하기 ~ 댓글 정보 불러오기 -->
+<select id="commentDetail" resultType="dog">
+		 select * from community_board_comment where bcomment_num = #{param1};
+</select> 
+
+	
+	
+</mapper>

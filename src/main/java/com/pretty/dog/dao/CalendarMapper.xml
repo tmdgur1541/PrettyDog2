@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.CalendarDao">
+
+	<select id="dateInfo" parameterType="HashMap" resultType="HashMap">
+		select *
+		from reservaestablecimiento 
+		where set_date = #{ChooseDate}
+		and busin_num = #{busin_num}
+	</select>
+
+
+
+	<insert id="oneDaySetting" parameterType="HashMap">
+		insert into reservaestablecimiento (busin_num, set_date , set_time)
+		values(#{busin_num}, #{set_date}, #{set_time})
+		on DUPLICATE key update
+		set_date = #{set_date},
+		set_time = #{set_time}
+	</insert>
+	
+	
+	<delete id="holiDay">
+		delete from reservaestablecimiento 
+		where set_date = #{param1}; 
+	</delete>
+	
+	
+	<select id="totalReserEx" resultType="HashMap" parameterType="HashMap">
+		SELECT * FROM reservaestablecimiento
+		WHERE date(set_date) >= date(now())
+		and busin_num = #{busin_num}
+	</select>
+	
+	
+	<insert id="noReserAllDate" parameterType="java.util.List">
+		insert into reservaestablecimiento (busin_num, set_date , set_time)
+		values 
+		<foreach collection="list" item="item" separator=",">
+			(#{item.busin_num}, #{item.set_date}, #{item.set_time})
+		</foreach>
+		on DUPLICATE key update
+		set_time = values(set_time)
+	</insert>
+
+	<delete id="delDate" parameterType="java.util.List"> 
+		DELETE FROM reservaestablecimiento 
+		<where> 
+			set_date IN
+			<foreach collection="list" item="item" open="(" separator="," close=")">
+				 #{item.del_date} 
+			 </foreach> 
+		 </where>
+	 </delete>
+
+
+	<select id="findMyDog" resultType="HashMap" parameterType="HashMap">
+		select *
+		from members m
+		join doginfo di
+		on m.mem_id = di.mem_id 
+		where m.mem_id = #{id}
+		and dog_state = 0
+	</select>
+	
+	
+	<select id="shopServiceInfo" resultType="HashMap" parameterType="HashMap">
+		select *
+		from shop s 
+		join price_list pl 
+		on s.busin_num = pl.busin_num 
+		join addition_place ap 
+		on pl.add_num = ap.add_num 
+		where s.busin_num = #{busin_num}
+		and ap.add_dog = #{add_num}
+		and pl.price_blind = 0
+	</select>
+	
+	
+	<!-- 예약 하면 더이상 예약을 할 수 없게 해당 시간 상태 변화 -->
+	<update id="reserState" parameterType="HashMap">
+		update reservaestablecimiento
+      set set_time = JSON_SET(set_time, #{ChoiceTime}, 1)
+      where set_date = #{ChoiceDate}
+      and busin_num = #{busin_num}
+	</update>
+	
+	<insert id="reserInfo" parameterType="HashMap">
+		insert into reservation(mem_id, busin_num, reser_dog, reser_service, reser_money, reser_visitday)
+		values(#{mem_id}, #{busin_num}, #{add_num}, #{service}, #{servicePrice}, #{reserTime})
+	</insert>
+	
+	<insert id="reserHistory" parameterType="HashMap">
+		insert into history(mem_id, busin_num, history_dog, history_service, history_money, history_visitday, history_states)
+		values(#{mem_id}, #{busin_num}, #{add_num}, #{service}, #{servicePrice}, #{reserTime},0)
+	</insert>
+	
+	
+	<update id="minusPoint">
+		update members
+		set mem_point = (mem_point - #{servicePrice})
+		where mem_id = #{mem_id}
+	</update>
+	
+	<update id="plusPoint">
+		update members
+		set mem_nopoint = (mem_nopoint + #{servicePrice})
+		where mem_id = #{busin_mem_id}
+	</update>
+	
+	<insert id="normalPointList">
+		insert into pointlist(mem_id, point_cdc, point_cont, point_distin)
+		values(#{mem_id}, #{servicePrice}, "예약금 차감", 1)
+	</insert>
+	
+	<insert id="businPointList">
+		insert into pointlist(mem_id, point_cdc, point_cont, point_distin)
+		values(#{busin_mem_id}, #{servicePrice}, "예약금 적립", 0)
+	</insert>
+	   
+	   
+	<select id="busin_num_chk" resultType="HashMap">
+		select *
+		from shop
+		where mem_id = #{loginId}
+	</select>
+	
+	<select id="reserSuccess" resultType="hashmap" parameterType="HashMap">
+		SELECT * from reservation where mem_id = #{mem_id} and  busin_num = #{busin_num} and reser_dog = #{add_num} 
+		and reser_service = #{service} and reser_money = #{servicePrice} and reser_visitday=#{reserTime} and reser_state = 0
+	</select>
+	
+	<insert id="reserSuccessAlarm">
+		insert into alarm (mem_id,reser_num,alarm_class)values(#{mem_id},#{reser_num},0)
+	</insert>
+	
+	<insert id="reserOwnerSuccess">
+		insert into alarm (mem_id,reser_num,alarm_class)values((select mem_id from shop where busin_num=#{busin_num}),#{reser_num},1)
+	</insert>
+	
+</mapper>

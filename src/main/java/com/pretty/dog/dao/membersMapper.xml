@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.MembersDAO">
+
+	<!-- 일반 회원가입 -->	
+	<insert id="joinShs" parameterType = "hashmap">
+	      INSERT INTO members (mem_id,mem_pw,mem_name,mem_tel,mem_email)
+	        VALUES(#{param1},#{param2},#{param3},#{param4},#{param5})
+	 </insert>
+
+	 
+	 <!-- 점주 회원가입 -->	
+	<insert id="ShopjoinShs" parameterType = "hashmap">
+	      INSERT INTO members (mem_id,mem_pw,mem_name,mem_tel,mem_email,mem_rank)
+	        VALUES(#{param1},#{param2},#{param3},#{param4},#{param5},'1')
+	 </insert>
+
+	<!-- 중복체크 -->	
+	<select id="overlayShsid" resultType="String">
+			SELECT mem_id FROM members WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 매장정보등록(회원가입) -->	
+	<insert id="ShopInfo" parameterType = "hashmap">
+	      INSERT INTO shop (busin_num,mem_id,busin_name,busin_info,busin_smalldog,busin_middledog,busin_bigdog,busin_area,busin_juso)
+	        VALUES(#{shopSaup},#{shopid},#{shopname},#{shopSogae},#{smallD},#{middleD},#{bigD},#{addr},#{shopAddr})
+	 </insert>
+	 
+	 	<!-- 사업자 중복체크 -->	
+	<select id="shopSaupCk" resultType="String">
+		SELECT busin_num FROM shop WHERE busin_num = #{param1}
+	</select>
+	 
+	 
+	 <!-- 매장인테리어 사진(회원가입) -->	
+	<insert id="shopPhoto">
+	      INSERT INTO interior (busin_num,interior_oriname,interior_newname)
+	        VALUES(#{param1},#{param2},#{param3})
+	 </insert>
+	 
+	 
+	 <!-- 회원탈퇴 -->
+	 <update id="memberOut">
+		update members set mem_state = '2' WHERE mem_id =#{param1}
+	</update>
+	 
+	 
+	 
+	 <!-- 마이페이지 비밀번호 확인 -->
+	<select id="PassCk" resultType="String">
+		SELECT mem_pw FROM members WHERE mem_id = #{param1}
+	</select>
+	 
+	 
+	 <!-- 개인정보 확인 -->
+	<select id="MyjungboSujungshs" resultType="com.pretty.dog.dto.DogDTO">
+		select * from members WHERE mem_id =#{param1}
+	</select>
+	
+	<!-- 개인정보 수정 -->
+	<update id="userUp" parameterType="hashmap">
+		update members set mem_email = #{email},mem_tel = #{phone}
+			<if test="!pw.equals('')">
+				,mem_pw = #{pw}
+			</if>	
+			WHERE mem_id =#{id}
+	</update>
+	
+	<!-- 매장정보 확인 -->
+	<select id="MyShopInfoshs" resultType="com.pretty.dog.dto.DogDTO">
+		select * from shop WHERE mem_id =#{param1}
+	</select>
+	 
+	 
+	 <!-- MY 매장정보 수정 -->
+	<update id="shopup" parameterType = "hashmap">
+		update shop set 
+			busin_info =#{shopSogae},
+			busin_area =#{addr}, 
+			busin_juso=#{shopAddr},
+			busin_smalldog=#{smallD},
+			busin_middledog=#{middleD},
+			busin_bigdog=#{bigD},
+			busin_name=#{busin_name},
+			busin_num=#{busin_num}
+			WHERE mem_id =#{id}
+	</update>
+	
+	
+	<!-- MY 매장정보 수정을 위한 아이디 체크-->
+	<select id="shopIdck" resultType="Integer">
+		select COUNT(*) from shop WHERE mem_id =#{param1}
+	</select>
+	
+	
+	<!-- MY 매장 회원가입 단계에서 매장정보 등록을 안했을때-->
+	<insert id="shopIn" parameterType = "hashmap">
+	      INSERT INTO shop (busin_num,mem_id,busin_name,busin_info,busin_smalldog,busin_middledog,busin_bigdog,busin_area,busin_juso)
+	        VALUES(#{busin_num},#{id},#{busin_name},#{shopSogae},#{smallD},#{middleD},#{bigD},#{addr},#{shopAddr})
+	 </insert>
+	
+	
+	 
+	 
+	 <!-- MY강아지 등록 -->
+	 <insert id="DogUp" parameterType = "String">
+	      INSERT INTO doginfo (mem_id,dog_name,dog_age,dog_weight,dog_char)
+	        VALUES(#{param1},#{param2},#{param3},#{param4},#{param5})
+	 </insert>
+	 
+	 <!-- MY강아지 리스트-->
+	 <select id="Mydogshs" resultType="com.pretty.dog.dto.DogDTO">
+		select * from doginfo WHERE mem_id =#{param1} AND dog_state =0
+	</select>
+	
+	<!-- MY 강아지 등록 정보 삭제 -->
+	<update id="DogDel">
+		update doginfo set dog_state = '1' WHERE mem_id =#{param1} AND dog_num = #{param2}
+	</update>
+	
+	<!-- MY 강아지 정보 확인 -->
+	<select id="MyDogsujungshs" resultType="com.pretty.dog.dto.DogDTO">
+		select * from doginfo WHERE mem_id =#{param1} AND dog_name = #{param2} AND dog_state='0'
+	</select>
+	
+	<!-- MY 강아지 정보 수정 -->
+	<update id="DogSujung">
+		update doginfo set 
+		dog_name=#{param2},
+		dog_age=#{param3}, 
+		dog_weight=#{param4},
+		dog_char=#{param5}
+		 WHERE mem_id =#{param1} AND dog_name = #{param2}
+	</update>
+	
+	<!-- 개인정보수정 비밀번호 확인창 멤버 정보불러오기 -->
+	<select id="memberPassCk" resultType="dog">
+		SELECT * FROM members WHERE mem_id = #{param1}
+	</select>
+
+
+	<!-- 영우 페이지 이동시 세션 로그인 등급 확인 -->
+	<select id="MyDogInfoshs" resultType="dog">
+		SELECT * FROM members WHERE mem_id = #{param1}
+	</select>
+
+ <!-- 마이페이지 알림리스트 갯수 -->
+   <select id="AlrimPageListCount" resultType="int">
+      SELECT count(alarm_num) FROM alarm WHERE mem_id = #{param1}
+   </select>
+
+   <!-- 마이페이지 알림리스트 목록 -->
+   <select id="AlrimPageList" resultType="dog">
+      SELECT alarm_num,mem_id,reser_num,alarm_date,alarm_class FROM alarm WHERE mem_id = #{param3} ORDER BY alarm_num DESC LIMIT #{param1} OFFSET #{param2}
+   </select>
+   
+   <!-- 알림페이지 멤버상태 -->
+   <select id="AlarmMem" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 알림삭제 -->
+   <delete id="alarmDel">
+      DELETE FROM alarm WHERE alarm_num = #{param1}
+   </delete>
+   
+   <!-- 내게시물페이지 이동 -->
+   <select id="MyBoard" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내게시글 페이징 카운터 -->
+   <select id="MyBoardPageListCount" resultType="int">
+      SELECT count(community_boardnum) FROM community_board WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내게시글 리스트 -->
+   <select id="MyBoardPageList" resultType="dog">
+      SELECT * FROM community_board WHERE mem_id = #{param3} and community_blind = 0 ORDER BY community_boardnum DESC LIMIT #{param1} OFFSET #{param2}
+   </select>
+   
+   <!-- 게시글 블라인드처리 -->
+   <update id="boardDel">
+      UPDATE community_board SET community_blind = 1 WHERE community_boardnum =#{param1} and mem_id = #{param2}
+   </update>
+   
+   <!-- 내댓글페이지이동 -->
+   <select id="MyComment" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내댓글 페이징 카운터 -->
+   <select id="CommentPageListCount" resultType="int">
+      SELECT count(bcomment_num) FROM community_board_comment WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내댓글 리스트 -->
+   <select id="CommentPageList" resultType="dog">
+      SELECT * FROM community_board_comment WHERE mem_id = #{param3} and bcomment_blind = 0 ORDER BY bcomment_num DESC LIMIT #{param1} OFFSET #{param2}
+   </select>
+   
+   <!-- 댓글 블라인드처리 -->
+   <update id="commentDel">
+      UPDATE community_board_comment SET bcomment_blind = 1 WHERE bcomment_num =#{param1} and mem_id = #{param2}
+   </update>
+   
+   <!-- 내댓글페이지이동 -->
+   <select id="MyLikeShop" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내 관심매장 페이징 카운터 -->
+   <select id="MyLikeShopListCount" resultType="int">
+      SELECT count(interestshop_num) FROM interest_shop WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 관심매장 불러오기 -->
+   <select id="MyLikeShopList" resultType="dog">
+      SELECT i.interestshop_num,i.mem_id,i.busin_num,s.busin_name FROM interest_shop i join shop s on i.busin_num = s.busin_num
+      WHERE i.mem_id = #{param3} ORDER BY interestshop_num DESC LIMIT #{param1} OFFSET #{param2}
+   </select>
+   
+   <!-- 관심매장삭제 -->
+   <delete id="LikeShopDel">
+      DELETE FROM interest_shop WHERE interestshop_num = #{param1}
+   </delete>
+   
+   <!-- 매장 추천수 -1 하기 -->
+   <update id="shopLikeCount">
+		update shop set busin_likes = busin_likes - 1 where busin_num = (select busin_num from interest_shop where interestshop_num = #{param1})
+   </update>
+   
+   <!-- 예약목록페이지이동 -->
+   <select id="MyPageReserPage" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내 예약목록 페이징 카운터 -->
+   <select id="MyReserPageListCount" resultType="int">
+      SELECT count(reser_num) FROM reservation WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 내 예약목록 리스트 가져오기 -->
+   <select id="MyReserPageList" resultType="dog">
+      select * from reservation r join shop s on r.busin_num = s.busin_num where r.mem_id = #{param3} ORDER BY reser_num DESC LIMIT #{param1} OFFSET #{param2}
+   </select>
+   
+   <!-- 예약취소 -->
+   <update id="reserDel">
+      UPDATE reservation SET reser_state = 2 WHERE reser_num = #{param1} and mem_id = #{param2}
+   </update>
+   
+   <!-- 예약취소 완료 후 예약정보가져오기 -->
+   <select id="reserData" resultType="hashmap">
+      SELECT * FROM reservation WHERE reser_num = #{param1} 
+   </select>
+   
+   <!-- 예약취소 후 예약로그 저장 -->
+   <insert id="reserLogInsert" parameterType="hashmap"> 
+      INSERT INTO history(mem_id,busin_num,history_askdate,history_dog,history_service,history_visitday,history_money,history_states)
+         values(#{mem_id},#{busin_num},#{reser_askdate},#{reser_dog},#{reser_service},#{reser_visitday},#{reser_money},#{reser_state})
+   </insert>
+   
+   <!-- 예약취소 후 취소한 일반회원 알림테이블 저장 -->
+   <insert id="reserCancleInsert" parameterType="hashmap">
+      INSERT INTO alarm (mem_id,reser_num,alarm_class)values(#{mem_id},#{reser_num},2)
+   </insert>
+   
+   <!-- 예약취소 후 취소당한 업주회원 알림테이블 저장 -->
+   <insert id="OwnerCancleInsert" parameterType="hashmap">
+      INSERT INTO alarm (mem_id,reser_num,alarm_class) 
+         values((select mem_id from shop s where busin_num = (select busin_num from reservation where reser_num = #{reser_num}))
+         ,#{reser_num},2)
+   </insert>
+   
+   <!-- 예약취소 후 회원테이블 포인트컬럼 가감 -->
+   <update id="reserDelMemPointAdd">
+      UPDATE members SET mem_point = (select mem_point from members where mem_id = #{param1})+#{param2} WHERE mem_id = #{param1}
+   </update>
+   
+   <!-- 예약취소 후 포인트테이블 추가포인트 등록 -->
+   <insert id="reserDelMemPointTable">
+      INSERT INTO pointList (mem_id,point_cdc,point_cont,point_distin) values (#{param1},#{param2},"예약취소",0)
+   </insert>
+   
+   <!-- 예약취소 후 업주회원 노포인트 컬럼 차감 -->
+   <update id="reserDelOwnerPointDel">
+      update members set mem_nopoint = (select mem_nopoint from members 
+      where mem_id = (select mem_id from shop where busin_num = #{param2}))- #{param1} 
+      where mem_id = (select mem_id from shop where busin_num = #{param2});
+   </update>
+   
+   <!-- 예약취소 후 포인트테이블 업주 회원 등록 -->
+   <insert id="reserDelOwnerPointTable">
+      INSERT INTO pointList (mem_id,point_cdc,point_cont,point_distin) values ((select mem_id from shop where busin_num = #{param2}),#{param1},"예약취소",1)
+   </insert>
+   
+   <!-- 업주회원 예약관리 -->
+   <select id="OwnerReserPage" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 업주회원 예약리스트 -->
+   <select id="OwnerReserPageList" resultType="dog">
+      <!-- select * from reservation r join shop s ON r.busin_num = s.busin_num 
+      join price_list pl on r.busin_num = pl.busin_num 
+      join doginfo d on r.mem_id = d.mem_id  
+      where s.mem_id = "cyw4328"#{param3} 
+      ORDER BY reser_num DESC LIMIT #{param1} OFFSET #{param2} -->   
+      select * from reservation r join shop s ON r.busin_num = s.busin_num 
+      where s.mem_id = #{param3} ORDER BY reser_num desc LIMIT #{param1} OFFSET #{param2};
+   </select>
+   
+   <!-- 업주회원 예약리스트 페이징 -->
+   <select id="OwnerReserPageListCount" resultType="int">
+      select count(reser_num) from reservation r join shop s on r.busin_num  = s.busin_num where s.mem_id = "cyw4328"<!-- #{param1} -->; 
+   </select>
+   
+   <!-- 업주회원 예약 노쇼처리 -->
+   <update id="NoShowChange">
+      UPDATE reservation SET reser_state = 1 WHERE reser_num = #{param1}
+   </update>
+   
+   <!-- 노쇼처리 예약히스토리 등록 -->
+   <insert id="reserLogNoshow" parameterType="hashmap">
+      INSERT INTO history(mem_id,busin_num,history_askdate,history_dog,history_service,history_visitday,history_money,history_states)
+         values(#{mem_id},#{busin_num},#{reser_askdate},#{reser_dog},#{reser_service},#{reser_visitday},#{reser_money},#{reser_state})
+   </insert>
+   
+   <!-- 노쇼처리 후 업주 노포인트차감 -->
+   <update id="NoShopNoPoint">
+      update members set mem_nopoint = (select mem_nopoint from members where mem_id = 
+         (select mem_id from shop where busin_num = #{param1})) - #{param3} where mem_id = 
+         (select mem_id from shop where busin_num =#{param1})
+   </update>
+   
+   <!-- 노쇼처리 후 업주 포인트 가감 -->
+   <update id="NoShowPointAdd">
+      update members set mem_point = (select mem_point from members where mem_id = 
+         (select mem_id from shop where busin_num = #{param1})) + #{param2} where mem_id = 
+         (select mem_id from shop where busin_num =#{param1})
+   </update>
+   
+   <!-- 업주회원 예약 이용완료처리 -->
+   <update id="SuccessChange">
+      UPDATE reservation SET reser_state = 3 WHERE reser_num = #{param1}
+   </update>
+   
+   <!-- 이용완료처리 예약히스토리 등록 -->
+   <insert id="reserLogSuccess" parameterType="hashmap">
+      INSERT INTO history(mem_id,busin_num,history_askdate,history_dog,history_service,history_visitday,history_money,history_states)
+         values(#{mem_id},#{busin_num},#{reser_askdate},#{reser_dog},#{reser_service},#{reser_visitday},#{reser_money},#{reser_state})
+   </insert>
+   
+   <!-- 이용완료처리시 일반회원 알림등록 -->
+   <insert id="AlarmInsert" parameterType="hashmap">
+      INSERT INTO alarm (mem_id,reser_num,alarm_class)values(#{mem_id},#{reser_num},4)
+   </insert>
+   
+   <!-- 이용완료처리시 후 업주 노포인트차감 -->
+   <update id="UseSuccessNoPoint">
+      update members set mem_nopoint = (select mem_nopoint from members where mem_id = 
+         (select mem_id from shop where busin_num = #{param1})) - #{param3} where mem_id = 
+         (select mem_id from shop where busin_num =#{param1})
+   </update>
+   
+   <!-- 이용완료처리시 후 업주 포인트 가감 -->
+   <update id="UseSuccessPointAdd">
+      update members set mem_point = (select mem_point from members where mem_id = 
+         (select mem_id from shop where busin_num = #{param1})) + #{param2} where mem_id = 
+         (select mem_id from shop where busin_num =#{param1})
+   </update>
+   
+   <!-- 예약로그페이지 -->
+   <select id="OwnerReserLogPage" resultType="dog">
+      SELECT * FROM members WHERE mem_id = #{param1}
+   </select>
+   
+   <!-- 예약로그 페이징 카운트 -->
+   <select id="ReserLogListCount" resultType="int">
+      select count(history_num) from history h join shop s on h.busin_num = s.busin_num where s.mem_id = #{param1}
+   </select>
+   
+   <!-- 예약히스토리 리스트  -->
+   <select id="ReserLogList" resultType="dog">
+      select * from history h join shop s on h.busin_num = s.busin_num 
+         where s.mem_id = #{param3}ORDER BY history_num DESC LIMIT #{param1} OFFSET #{param2};
+   </select>
+  
+   <!-- 서비스추가 페이지 해당 매장 정보 -->
+   <select id="ShopServiceList" resultType="dog">
+      select * from shop s where mem_id = #{param1};
+   </select>
+   
+   <!-- 서비스추가페이지 해당 매장 서비스 목록 -->
+   <select id="ShopService" resultType="dog">
+      select * from price_list pl join addition_place ap on pl.add_num = ap.add_num 
+         where busin_num = (select busin_num  from shop s where mem_id = #{param1}) and price_blind=0;
+   </select>
+   
+   <!-- 추가서비스 소형견 항목 리스트 -->
+   <select id="AddSmallServiceName" resultType="dog">
+      SELECT * FROM addition_place WHERE add_blind = 0 and add_dog = 1;
+   </select>
+   
+   <!-- 추가서비스 중형견 항목 리스트 -->
+   <select id="AddMiddleServiceName" resultType="dog">
+      SELECT * FROM addition_place WHERE add_blind = 0 and add_dog = 2;
+   </select>
+   
+   <!-- 추가서비스 대형견 항목 리스트 -->
+   <select id="AddBigServiceName" resultType="dog">
+      SELECT * FROM addition_place WHERE add_blind = 0 and add_dog = 3;
+   </select>
+   
+   <!-- 매장서비스 삭제 -->
+   <update id="SreviceDel">
+      update price_list set price_blind = 1 WHERE price_num = #{param1}
+   </update>
+   
+   <!-- 매장 추가 서비스 소형견 등록 -->
+   <insert id="addShopSmallService">
+      INSERT INTO price_list (busin_num,add_num,price_cost,price_class) values(#{param3},#{param2},#{param1},1)
+   </insert>
+   <!-- 매장 추가 서비스 중형견 등록 -->
+   <insert id="addShopMiddleService">
+      INSERT INTO price_list (busin_num,add_num,price_cost,price_class) values(#{param3},#{param2},#{param1},2)
+   </insert>
+   
+   <!-- 매장 추가 서비스 대형견 등록 -->
+   <insert id="addShopBigService">
+      INSERT INTO price_list (busin_num,add_num,price_cost,price_class) values(#{param3},#{param2},#{param1},3)
+   </insert>
+   
+   <!-- 예약취소시 업주 노포인트에서 포인트로 변경 -->
+   <update id="reserDelOwnerPointChange">
+      update members set mem_nopoint = mem_nopoint-#{param1} 
+         where mem_id = (select mem_id from shop where busin_num = #{param2})
+   </update>
+   
+   <!-- 예약취소시 업주 포인트 더하기 -->
+   <update id="reserDelOwnerPointAdd">
+      update members set mem_point = mem_point +#{param1} 
+      where mem_id = (select mem_id from shop where busin_num = #{param2});
+   </update>
+   <!-- 취소시 예약 가능 상태로 변경 -->
+   <update id="reserStateChange" parameterType="HashMap">
+      update reservaestablecimiento
+      set set_time = JSON_SET(set_time, #{param3}, 0)
+      where set_date = #{param2}
+      and busin_num = #{param1}
+   </update>
+
+</mapper>

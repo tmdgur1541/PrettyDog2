@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.ShopListDAO">
+
+	<select id="addservice" resultType="string">
+		SELECT add_sub FROM addition_place WHERE add_blind = 0
+	</select>
+	
+	<!-- <select id="shopList" resultType="dog">
+		SELECT * FROM 
+			shop s join price_list pl 
+			on s.busin_num = pl.busin_num	
+			join interior i 
+			on s.busin_num = i.busin_num
+			WHERE busin_calss = 1 order by busin_date desc
+	</select> -->
+	
+	<select id="shopSerch" resultType="dog">
+		SELECT * FROM 
+			<!-- shop s join price_list pl 
+			on s.busin_num = pl.busin_num	
+			join interior i 
+			on s.busin_num = i.busin_num
+			join addition_place ap 
+			on pl.add_num = ap.add_num
+			WHERE busin_calss = 1 -->
+			price_list pl join shop s on pl.busin_num = s.busin_num
+			join interior i 
+			on s.busin_num = i.busin_num
+			join addition_place ap 
+			on pl.add_num = ap.add_num
+			WHERE s.busin_calss = 1 and price_blind = 0
+			<if test='areaScope != null and areaScope != ""'>
+				and s.busin_area = #{areaScope}
+			</if>
+			<if test= 'dogScope != null and dogScope == 1'>
+				and pl.price_class = 1
+			</if>
+			<if test= 'dogScope != null and dogScope == 2'>
+				and pl.price_class = 2
+			</if>
+			<if test= 'dogScope != null and dogScope == 3'>
+				and pl.price_class = 3
+			</if>
+			<if test='serviceScope != null and serviceScope != 0'>
+				and pl.add_num = ${serviceScope}
+			</if>
+			<if test="nameScope != null and !('').equals(nameScope)">
+				and s.busin_name LIKE CONCAT('%',#{nameScope},'%')
+			</if>
+			<if test="'dogScope != null and dogScope == 3 and dogScope == 1 and dogScope == 2 and areaScope != null and areaScope != '">
+				group by s.busin_num			
+			</if>
+			
+			<choose>
+				<when test="('recomendFilter').equals(hiddenFilter)">
+					order by s.busin_likes desc
+				</when>
+				<when test="('lowPriceFilter').equals(hiddenFilter)">
+					order by pl.price_cost
+				</when>
+				<when test="('highPriceFilter').equals(hiddenFilter)">
+					order by pl.price_cost desc
+				</when>
+				<otherwise>
+					order by busin_date desc 
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="cnt != null and offset !=null">
+					LIMIT ${cnt} OFFSET ${offset}
+				</when>
+				<otherwise>
+					LIMIT 6 OFFSET 0
+				</otherwise>
+			</choose>
+	</select>
+	
+		<!-- 샵리스트 갯수 -->
+	<select id="ShopListCount" resultType="int">
+		SELECT count(distinct s.busin_num) FROM 
+			price_list pl join shop s
+			on pl.busin_num = s.busin_num	
+			join interior i 
+			on s.busin_num = i.busin_num
+			WHERE busin_calss = 1 
+			<if test='areaScope != null and areaScope != ""'>
+				and s.busin_area = #{areaScope}
+			</if>
+			<if test= 'dogScope != null and dogScope == 1'>
+				and s.busin_smalldog = 1
+			</if>
+			<if test= 'dogScope != null and dogScope == 2'>
+				and s.busin_middledog = 1
+			</if>
+			<if test= 'dogScope != null and dogScope == 3'>
+				and s.busin_bigdog = 1
+			</if>
+			<if test='serviceScope != null and serviceScope != 0'>
+				and pl.add_num = ${serviceScope}
+			</if>
+			<if test="nameScope != null and !('').equals(nameScope)">
+				and s.busin_name LIKE CONCAT('%',#{nameScope},'%')
+			</if>
+	</select>
+	
+	<select id="LikeCheck"  resultType="int">
+		SELECT count(interestshop_num) FROM interest_shop WHERE busin_num = #{param1} AND mem_id = #{param2}
+	</select>
+	
+	<delete id="deleteLike">
+		DELETE FROM interest_shop where busin_num = #{param1} AND mem_id = #{param2}
+	</delete>
+	
+	<update id="CancelBLike" parameterType="int">
+		UPDATE shop SET busin_likes = busin_likes -1 WHERE busin_num = #{param1}
+	</update>
+	
+	<insert id="insertLike">
+		INSERT INTO interest_shop (busin_num, mem_id) VALUES (#{param1}, #{param2})
+	</insert>
+	
+	<update id="updateBLike" parameterType="int">
+		UPDATE shop SET busin_likes = busin_likes+1 WHERE busin_num = #{param1}
+	</update>
+	
+	<!-- 견종선택시 해당서비스 리스트 -->
+	<select id="serviceScopeSelect" resultType="dog">
+		SELECT * FROM addition_place WHERE add_dog = #{param1}
+	</select>
+	
+		<select id="sshShopList" resultType="hashmap">
+		select busin_num,mem_id,busin_name,busin_info,busin_smalldog,busin_middledog,busin_bigdog,busin_area
+		,busin_likes,busin_date,busin_calss,busin_juso
+		from shop
+	</select>
+	
+	<select id="sshShopDetail" resultType="hashmap">
+		select *
+		from shop s, members m, interior i
+		where s.mem_id = m.mem_id
+		and i.busin_num = s.busin_num 
+		and m.mem_id = s.mem_id 
+		and i.busin_num = #{param1}
+	</select>
+	
+	<select id="sshShopDetailTwo" resultType="hashmap">
+		select *
+		from shop s, members m
+		where s.mem_id = m.mem_id
+		and s.busin_num = #{param1}
+	</select>
+	
+	
+	<select id="sshMyInterestShopList" resultType="hashmap">
+		select *
+		from members m, shop s, interest_shop isp
+		where m.mem_id = isp.mem_id
+		and s.busin_num = isp.busin_num
+		and m.mem_id = #{param1}
+		and s.busin_num = #{param2}
+	</select>
+	
+	<select id="sshShopQnaList" resultType="hashmap">
+		select *
+		from shop_board
+		where shop_boardclass = 2
+		and busin_num = #{param1}
+		order by shop_boardnum desc
+	</select>
+	
+	<select id="sshShopQnaIdChk" resultType="hashmap">
+		select *
+		from shop_board sb, shop_board_comment sbc
+		where sb.shop_boardnum = sbc.shop_boardnum
+		and sbc.mem_id = #{param1}
+	</select>
+
+	<select id="qnaComChk" parameterType="java.util.List" resultType="hashmap">
+		select *
+		from shop_board sb, shop_board_comment sbc
+		where sb.shop_boardnum = sbc.shop_boardnum
+		and sbc.shop_boardnum in
+		<foreach collection="list" item="item" open="(" close=")"  separator=",">
+			#{item}
+		</foreach>
+	</select>
+	
+	<insert id="QnaNnswerInsert">
+		insert into shop_board_comment(shop_boardnum, mem_id, scomment_cont,scomment_class)
+		values(#{param3}, #{param2}, #{param1},2)
+	</insert>
+	
+	<select id="sshShopQnaNnswerList" resultType="hashmap">
+		select *
+		from shop_board_comment
+	</select>
+	
+	<insert id="QnaWrite">
+		insert into shop_board (mem_id, busin_num,shop_boardsub,shop_boardcont,shop_boardclass)
+		values(#{param2}, #{param3},'', #{param1},2)
+	</insert>
+	
+	<select id="sshShopRevList" resultType="hashmap">
+		select *
+		from shop_board sb, shop_board_photo sbp, recommendation r
+		where sb.shop_boardnum = sbp.shop_boardnum
+		and sbp.shop_boardnum = r.shop_boardnum
+		and sb.shop_boardclass = 1
+		and sb.busin_num = #{param1}
+	</select>
+	
+	<select id="revLength" resultType="hashmap">
+		select *
+		from reservation
+		where reser_state = 3
+		and mem_id = #{param1}
+		and busin_num = #{param2}
+		order by reser_visitday desc
+		limit 1
+	</select>
+	
+	<update id="reservationUpdate">
+		update
+			reservation
+		set 
+			reser_state = 4
+		where
+			reser_num = #{param1}	
+	</update>
+	
+	<insert id="reviewWrite" parameterType="hashmap">
+		insert into shop_board(mem_id, busin_num, shop_boardsub, shop_boardcont, shop_boardclass)
+			values(#{mem_id}, #{busin_num}, '',#{shop_boardcont},1)
+			<selectKey keyProperty="shop_boardnum" resultType="Integer" order="AFTER">
+        		SELECT LAST_INSERT_ID()
+    		</selectKey>
+	</insert>
+	
+	<insert id="recommendationWrite">
+		insert into recommendation(shop_boardnum, apprai_cont)
+		values(#{param1}, #{param2})
+	</insert>
+	
+	<insert id="fileWrite">
+		insert into shop_board_photo(shop_boardnum, sphoto_oriname, sphoto_newname) values(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<insert id="baseSaveFile">
+		insert into shop_board_photo(shop_boardnum, sphoto_oriname, sphoto_newname) values(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<update id="memberPointUpdate" parameterType="String">
+		update 
+			members
+		set 
+			mem_point = mem_point+100
+		where
+			mem_id = #{param1}
+	</update>
+	
+	<insert id="pointListInsert">
+		insert into pointlist(mem_id, point_cdc, point_cont,point_distin) values(#{param1}, 100,'리뷰작성', 0)
+	</insert>
+	
+	<insert id="myShopLikeInsert">
+		insert into interest_shop(mem_id, busin_num) values(#{param1}, #{param2})
+	</insert>
+	
+	<update id="shopLikeUpdate">
+		update
+			shop
+		set
+			busin_likes = busin_likes + 1
+		where
+			busin_num = #{param1}
+	</update>
+	
+	<delete id="myShopLikeDelete">
+		delete from 
+			interest_shop
+		where
+			busin_num = #{param2}
+		and
+			mem_id = #{param1}
+	</delete>
+	
+	<update id="shopLikeDown">
+		update
+			shop
+		set
+			busin_likes = busin_likes - 1
+		where
+			busin_num = #{param1}
+	</update>
+	
+</mapper>

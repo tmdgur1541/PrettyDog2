@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.HomeDAO">
+	
+	<select id="idRankChk" resultType="HashMap">
+		select *
+		from members
+		where mem_id = #{loginId}
+		and mem_state = 0
+	</select>
+	 
+	<select id="login" resultType="String">
+		SELECT mem_pw FROM members WHERE mem_id = #{param1}
+	</select>
+	
+	<select id="idSearch" resultType="dog">
+		SELECT * FROM members WHERE mem_name = #{param1} and mem_email = #{param2}
+	</select>
+	
+	<select id="pwSearch" resultType="int">
+		SELECT count(*) FROM members WHERE mem_id = #{param1} and mem_name = #{param2} and mem_tel = #{param3} and mem_email = #{param4}
+	</select>
+	
+	<update id="pwChange">
+		UPDATE members SET mem_pw = #{param2} WHERE mem_id = #{param1}
+	</update>
+	
+	<select id="snsUser" resultType="int">
+		SELECT count(mem_id) FROM members WHERE mem_id = #{param1} 
+	</select>
+	
+	<insert id="snsInsert">
+		INSERT INTO members (mem_id,mem_email,mem_name) VALUES (#{param1},#{param1},"kakaoMem")
+	</insert>
+
+</mapper>

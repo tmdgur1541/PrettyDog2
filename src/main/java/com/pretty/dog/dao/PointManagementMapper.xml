@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.PointManagementDAO">
+
+	<!-- 포인트 충전 -->
+	<insert id="pointInsert">
+		INSERT INTO pointlist (mem_id,point_cdc,point_cont,point_distin)
+			values (#{param2},#{param1},"포인트충전",0); 
+	</insert>
+	
+	<!-- 회원테이블 포인트부분 수정 -->
+	<update id="memPointAdd">
+		<!-- update members set mem_point = (select sum(point_cdc) from pointlist where mem_id = #{param2}) where mem_id = #{param2} -->
+		update members set mem_point = (select mem_point from members where mem_id = #{param2})+#{param1} where mem_id = #{param2}
+	</update>
+
+	<!-- 포인트리스트페이지 정보 -->
+	<select id="memPointSelect" resultType="dog">
+		SELECT * FROM members WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 회원테이블 내역조회(페이징)-->
+	<select id="allCountMemPointList" resultType="int">
+		SELECT COUNT(point_num) FROM pointList WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 회원 총 포인트리스트 조회 -->
+	<select id="memPointList" resultType="dog">
+		SELECT * FROM pointList WHERE mem_id = #{param3} ORDER BY point_num DESC LIMIT #{param1} OFFSET #{param2}
+	</select>
+	
+	<!-- 업주회원 환전포인트 페이지이동 -->
+	<select id="onerPointChange" resultType="int">
+		SELECT mem_point FROM members WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 업주회원 환전내역리스트 갯수 페이징 -->
+	<select id="allPointChCount" resultType="int">
+		SELECT count(poch_num) FROM pointCh WHERE mem_id =#{param1}
+	</select>
+	
+	<!-- 업주회원 환전리스트 내역 -->
+	<select id="onerPointListCall" resultType="dog">
+		SELECT * FROM pointCh WHERE mem_id = #{param1} ORDER BY poch_num DESC LIMIT #{param2} OFFSET #{param3}
+	</select>
+	
+	<!-- 업주포인트 존재 유무 -->
+	<select id="OnerPointCheck" resultType="int">
+		SELECT count(poch_money) FROM pointCh WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 업주회원 환전가능포인트 -->
+	<select id="onerAllCount" resultType="int">
+		SELECT sum(poch_money) FROM pointCh WHERE mem_id = #{param1}
+	</select>
+	
+	<!-- 환전시 업주회원 포인트차감 -->
+	<update id="onerPointDel">
+		UPDATE members SET 
+			mem_point = #{param2} WHERE mem_id = #{param1}
+	</update>
+	
+	<!-- 환전 테이블 저장 -->
+	<insert id="pointChInsert">
+		INSERT INTO pointCh (mem_id,poch_money,poch_bank,poch_banknum)values(#{param1},#{param2},#{param3},#{param4});
+	</insert>
+	
+	<!-- 환전시 포인트내역에 등록 -->
+	<insert id="insertOnerPoint">
+		INSERT INTO pointList (mem_id,point_cdc,point_cont,point_distin)values(#{param1},#{param2},"환전완료",1);
+	</insert>
+	
+	
+	
+</mapper>

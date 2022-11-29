@@ -1,0 +1,84 @@
+@charset "UTF-8";
+
+
+
+h2{text-align: center; margin-top:60px; margin-bottom:20px;}
+#formDiv{
+		border-radius: 100px;
+}
+table {
+	width: 430px;
+	border: 1px solid #eeeeee;
+	border-collapse: collapse;
+	padding: 5px 10px;
+	border-radius: 5px;
+  	border-style: hidden;
+ 	box-shadow: 1px 2px 4px 1px #cbcbcb;
+ 	
+
+
+	
+
+}
+
+
+	th,td{
+	border-bottom: 1px solid #dedede;
+	border-collapse: collapse;
+	padding: 5px 10px;
+	color:#303030;
+	font-weight: bold;
+	border-radius: 5px;
+	height:60px;
+}
+
+input[type='text']{
+	width: 200px;
+	font-size: 15px;
+	padding:5px 3px; 
+	color:#303030;
+	border:0px;
+}
+input[type='password']{
+	width: 200px;
+	font-size: 15px;
+	padding:5px 3px; 
+	color:#303030;
+	border:0px;
+}
+
+input[type='placeholder']{
+	color:#eeeeee;
+	font-size:13px;
+}
+
+input[type='button'],input[type='submit']{
+	background-color:black; 
+	color:#FFF; 
+	font-weight:bold; 
+	border:0px;
+	padding:3px 10px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+#overlay{
+	background-color: #df7800;
+}
+
+#mailCheck{
+	background-color: #00455b;
+}
+
+textarea {
+	width: 100%;
+	height: 150px;
+	resize: none;
+}
+
+#btn-join{
+	padding:8px 17px;
+	background-color: #76b9ce;
+	color:#21353b;
+	font-weight:bold; 
+	font-size: 15px;
+}

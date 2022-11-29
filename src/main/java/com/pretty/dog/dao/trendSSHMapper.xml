@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd"
+>
+
+<!-- namespace : 이 XML 이 어떤 interface 와 연결되는지 설정 -->
+<mapper namespace="com.pretty.dog.dao.TrendDAO">
+
+	<select id="beautyTrendList" resultType="hashmap">
+		select m.mem_id,m.mem_pw,m.mem_name,m.mem_email,m.mem_tel,m.mem_rank,m.mem_state
+		,s.busin_num,s.mem_id,s.busin_name,s.busin_info,s.busin_smalldog,s.busin_middledog,s.busin_bigdog,s.busin_area,s.busin_likes,s.busin_date,s.busin_calss,s.busin_juso
+		,cc.category_num,cc.category_name,cc.category_admin,cc.category_blind
+		,cb.community_boardnum,cb.category_num,cb.mem_id,cb.community_sub,cb.community_cont,cb.community_date,cb.community_updatedate,cb.community_view,cb.community_likes,cb.community_blind
+		,cbp.bphoto_num,cbp.community_boardnum,cbp.bphoto_oriname,cbp.bphoto_newname,cbp.bphoto_date
+		from members m, shop s, community_category cc , community_board cb ,community_board_photo cbp
+		where m.mem_id = s.mem_id
+		and s.mem_id = cb.mem_id
+		and cc.category_num = cb.category_num
+		and cb.mem_id = m.mem_id
+		and cbp.community_boardnum = cb.community_boardnum
+		and cc.category_num = 3
+		and m.mem_rank = 1
+		and m.mem_state  = 0
+		and cb.community_blind = 0
+		order by cb.community_boardnum desc
+	</select>
+	
+	<select id="changeKoMap" resultType="hashmap">
+		select m.mem_id,m.mem_pw,m.mem_name,m.mem_email,m.mem_tel,m.mem_rank,m.mem_state
+		,s.busin_num,s.mem_id,s.busin_name,s.busin_info,s.busin_smalldog,s.busin_middledog,s.busin_bigdog,s.busin_area,s.busin_likes,s.busin_date,s.busin_calss,s.busin_juso
+		,cc.category_num,cc.category_name,cc.category_admin,cc.category_blind
+		,cb.community_boardnum,cb.category_num,cb.mem_id,cb.community_sub,cb.community_cont,cb.community_date,cb.community_updatedate,cb.community_view,cb.community_likes,cb.community_blind
+		,cbp.bphoto_num,cbp.community_boardnum,cbp.bphoto_oriname,cbp.bphoto_newname,cbp.bphoto_date
+		from members m, shop s, community_category cc , community_board cb ,community_board_photo cbp
+		where m.mem_id = s.mem_id
+		and s.mem_id = cb.mem_id
+		and cc.category_num = cb.category_num
+		and cb.mem_id = m.mem_id
+		and cbp.community_boardnum = cb.community_boardnum
+		and cc.category_num = 3
+		and m.mem_rank = 1
+		and m.mem_state  = 0
+		and s.busin_area = #{param1}
+		order by cb.community_boardnum desc
+	</select>
+	
+	<select id="beautyTrendDetail" resultType="hashmap">
+		select m.mem_id,m.mem_pw,m.mem_name,m.mem_email,m.mem_tel,m.mem_rank,m.mem_state
+		,s.busin_num,s.mem_id,s.busin_name,s.busin_info,s.busin_smalldog,s.busin_middledog,s.busin_bigdog,s.busin_area,s.busin_likes,s.busin_date,s.busin_calss,s.busin_juso
+		,cc.category_num,cc.category_name,cc.category_admin,cc.category_blind
+		,cb.community_boardnum,cb.category_num,cb.mem_id,cb.community_sub,cb.community_cont,cb.community_date,cb.community_updatedate,cb.community_view,cb.community_likes,cb.community_blind
+		,cbp.bphoto_num,cbp.community_boardnum,cbp.bphoto_oriname,cbp.bphoto_newname,cbp.bphoto_date
+		from members m, shop s, community_category cc , community_board cb ,community_board_photo cbp
+		where m.mem_id = s.mem_id
+		and s.mem_id = cb.mem_id
+		and cc.category_num = cb.category_num
+		and cb.mem_id = m.mem_id
+		and cbp.community_boardnum = cb.community_boardnum
+		and cc.category_num = 3
+		and m.mem_rank = 1
+		and m.mem_state  = 0
+		and cb.community_boardnum = #{param1}
+	</select>
+	
+	<select id="beautyTrendUpdate" resultType="hashmap">
+		select m.mem_id,m.mem_pw,m.mem_name,m.mem_email,m.mem_tel,m.mem_rank,m.mem_state
+		,s.busin_num,s.mem_id,s.busin_name,s.busin_info,s.busin_smalldog,s.busin_middledog,s.busin_bigdog,s.busin_area,s.busin_likes,s.busin_date,s.busin_calss,s.busin_juso
+		,cc.category_num,cc.category_name,cc.category_admin,cc.category_blind
+		,cb.community_boardnum,cb.category_num,cb.mem_id,cb.community_sub,cb.community_cont,cb.community_date,cb.community_updatedate,cb.community_view,cb.community_likes,cb.community_blind
+		,cbp.bphoto_num,cbp.community_boardnum,cbp.bphoto_oriname,cbp.bphoto_newname,cbp.bphoto_date
+		from members m, shop s, community_category cc , community_board cb ,community_board_photo cbp
+		where m.mem_id = s.mem_id
+		and s.mem_id = cb.mem_id
+		and cc.category_num = cb.category_num
+		and cb.mem_id = m.mem_id
+		and cbp.community_boardnum = cb.community_boardnum
+		and cc.category_num = 3
+		and m.mem_rank = 1
+		and m.mem_state  = 0
+		and cb.community_boardnum = #{param1}
+	</select>
+	
+	<select id="idChk" resultType="hashmap">
+		select *
+		from members
+		where mem_id = #{param1}
+	</select>
+	
+	<select id="memberRank1" resultType="hashmap">
+		select m.mem_id, m.mem_pw, m.mem_name, m.mem_email, m.mem_tel, m.mem_rank, m.mem_state, m.mem_date, m.mem_secession, m.mem_login, m.mem_point, m.mem_nopoint
+		,cc.category_num , cc.category_name , cc.category_admin , cc.category_blind
+		,cb.community_boardnum ,cb.category_num ,cb.mem_id ,cb.community_sub ,cb.community_cont ,cb.community_date ,cb.community_updatedate ,cb.community_view ,cb.community_likes ,cb.community_blind 
+		from members m , community_category cc , community_board cb
+		where m.mem_id = cb.mem_id
+		and cc.category_num = cb.category_num
+		and cb.category_num = cc.category_num
+		and m.mem_rank = 1
+		and m.mem_id = #{param1}
+	</select>
+
+	<insert id="beautyTrendWrite" parameterType="hashmap">
+		insert into community_board(category_num, mem_id, community_sub, community_cont)
+			values(3, #{mem_id}, #{community_sub}, #{community_cont})
+			<selectKey keyProperty="community_boardnum" resultType="Integer" order="AFTER">
+        		SELECT LAST_INSERT_ID()
+    		</selectKey>
+	</insert>
+	
+	<insert id="fileWrite">
+		insert into community_board_photo(community_boardnum, bphoto_oriname, bphoto_newname) values(#{param1}, #{param2}, #{param3})
+	</insert>
+	
+	<update id="trendUpdate" parameterType="hashmap">
+		update 
+			community_board 
+		set 
+			community_sub = #{community_sub}
+			,community_cont = #{community_cont}
+		where
+			community_boardnum = #{community_boardnum}
+	</update>
+	
+	<delete id="deleteCbpNewname">
+		delete from community_board_photo where bphoto_newname = #{param1}
+	</delete>
+	
+	<delete id="beautyTrendDelete">
+		delete from community_board where community_boardnum = #{param1}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
